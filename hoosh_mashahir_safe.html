@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>آموزشگاه هوش مشاهیر</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --gold:#C9A84C;--gold2:#F0D080;--dark:#0A0A0F;--dark2:#12121A;--dark3:#1A1A26;
+    --white:#F5F0E8;--accent:#4A90D9;--text:#E8E0D0;
+  }
+  html{scroll-behavior:smooth}
+  body{background:var(--dark);color:var(--text);font-family:'Vazirmatn',sans-serif;overflow-x:hidden;direction:rtl}
+
+  /* PRELOADER */
+  #preloader{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--dark);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity 0.8s ease}
+  #preloader.hide{opacity:0;pointer-events:none}
+  .loader-logo{width:100px;height:100px;animation:pulse 1.5s ease-in-out infinite}
+  .loader-text{margin-top:20px;font-size:1.2rem;color:var(--gold);letter-spacing:4px;animation:fadeInOut 1.5s ease-in-out infinite}
+  .loader-bar{width:200px;height:2px;background:#222;margin-top:20px;border-radius:2px;overflow:hidden}
+  .loader-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));width:0;animation:loadBar 2s ease forwards}
+  @keyframes loadBar{to{width:100%}}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.1);opacity:0.8}}
+  @keyframes fadeInOut{0%,100%{opacity:0.5}50%{opacity:1}}
+
+  /* WELCOME OVERLAY */
+  #welcome-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at center,#1A1A2E 0%,#0A0A0F 100%);z-index:8888;display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:0;pointer-events:none;transition:all 0.5s}
+  #welcome-overlay.show{opacity:1;pointer-events:all}
+  #welcome-overlay.hide{opacity:0;transform:scale(1.05);pointer-events:none}
+  .welcome-stars{position:absolute;width:100%;height:100%;overflow:hidden}
+  .star{position:absolute;background:white;border-radius:50%;animation:twinkle var(--d) ease-in-out infinite}
+  @keyframes twinkle{0%,100%{opacity:0.2;transform:scale(1)}50%{opacity:1;transform:scale(1.5)}}
+  .welcome-content{text-align:center;z-index:1;padding:2rem}
+  .welcome-logo{width:120px;height:120px;margin:0 auto 2rem;animation:welcomeLogo 1s ease forwards;opacity:0}
+  @keyframes welcomeLogo{from{opacity:0;transform:scale(0.5) rotate(-20deg)}to{opacity:1;transform:scale(1) rotate(0deg)}}
+  .welcome-title{font-size:clamp(1.5rem,5vw,3rem);font-weight:900;color:var(--gold);text-shadow:0 0 40px rgba(201,168,76,0.5);animation:slideUp 1s ease 0.5s forwards;opacity:0;line-height:1.4}
+  .welcome-subtitle{font-size:clamp(0.9rem,3vw,1.3rem);color:var(--text);margin-top:1rem;animation:slideUp 1s ease 0.8s forwards;opacity:0}
+  .welcome-enter-btn{margin-top:2.5rem;padding:14px 40px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;font-family:'Vazirmatn',sans-serif;font-size:1.1rem;font-weight:700;border:none;border-radius:50px;cursor:pointer;animation:slideUp 1s ease 1.2s forwards;opacity:0;box-shadow:0 0 30px rgba(201,168,76,0.4);transition:all 0.3s}
+  .welcome-enter-btn:hover{transform:scale(1.05);box-shadow:0 0 50px rgba(201,168,76,0.7)}
+  .welcome-line{width:150px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:1.5rem auto;animation:slideUp 1s ease 1s forwards;opacity:0}
+  @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+
+  /* NAVBAR */
+  nav{position:fixed;top:0;width:100%;z-index:1000;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;background:rgba(10,10,15,0.9);backdrop-filter:blur(20px);border-bottom:1px solid rgba(201,168,76,0.2);transition:all 0.3s}
+  .nav-logo{display:flex;align-items:center;gap:12px}
+  .nav-logo img{width:50px;height:50px;filter:brightness(1.1)}
+  .nav-logo-text{font-size:1.1rem;font-weight:700;color:var(--gold)}
+  .nav-support-btn{display:flex;align-items:center;gap:8px;padding:10px 20px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;font-family:'Vazirmatn',sans-serif;font-size:0.9rem;font-weight:700;border:none;border-radius:25px;cursor:pointer;text-decoration:none;transition:all 0.3s}
+  .nav-support-btn:hover{transform:scale(1.05);box-shadow:0 0 20px rgba(201,168,76,0.5)}
+
+  /* HERO */
+  #hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding-top:80px}
+  .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 50% 40%,rgba(201,168,76,0.08) 0%,transparent 70%)}
+  .particles{position:absolute;inset:0;overflow:hidden}
+  .particle{position:absolute;width:2px;height:2px;background:var(--gold);border-radius:50%;animation:float var(--d) ease-in-out infinite;opacity:0}
+  @keyframes float{0%{transform:translateY(100vh) scale(0);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(-100px) scale(1.5);opacity:0}}
+  .hero-content{text-align:center;z-index:1;padding:2rem;max-width:900px}
+  .hero-badge{display:inline-block;padding:6px 20px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.4);border-radius:20px;font-size:0.85rem;color:var(--gold);margin-bottom:2rem;letter-spacing:2px}
+  .hero-logo{width:150px;height:150px;margin:0 auto 2rem;filter:drop-shadow(0 0 30px rgba(201,168,76,0.4));animation:heroFloat 4s ease-in-out infinite}
+  @keyframes heroFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+  .hero-title{font-size:clamp(2rem,6vw,4rem);font-weight:900;line-height:1.2;margin-bottom:1rem}
+  .hero-title .gold{color:var(--gold);text-shadow:0 0 40px rgba(201,168,76,0.3)}
+  .hero-desc{font-size:clamp(1rem,2.5vw,1.3rem);color:#B0A898;line-height:2;max-width:600px;margin:0 auto 3rem}
+  .hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+  .btn-primary{padding:16px 40px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;font-family:'Vazirmatn',sans-serif;font-size:1.05rem;font-weight:700;border:none;border-radius:50px;cursor:pointer;box-shadow:0 0 30px rgba(201,168,76,0.3);transition:all 0.3s;text-decoration:none;display:inline-block}
+  .btn-primary:hover{transform:translateY(-3px);box-shadow:0 10px 40px rgba(201,168,76,0.5)}
+  .btn-outline{padding:16px 40px;background:transparent;color:var(--gold);font-family:'Vazirmatn',sans-serif;font-size:1.05rem;font-weight:600;border:1px solid rgba(201,168,76,0.5);border-radius:50px;cursor:pointer;transition:all 0.3s;text-decoration:none;display:inline-block}
+  .btn-outline:hover{background:rgba(201,168,76,0.1);transform:translateY(-3px)}
+  .scroll-hint{margin-top:4rem;display:flex;flex-direction:column;align-items:center;gap:8px;color:#555;font-size:0.85rem;animation:bounce 2s ease-in-out infinite}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+
+  /* STATS */
+  #stats{padding:5rem 2rem;background:var(--dark2)}
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:2rem;max-width:1000px;margin:0 auto}
+  .stat-card{text-align:center;padding:2.5rem 1.5rem;background:linear-gradient(135deg,rgba(201,168,76,0.05),rgba(201,168,76,0.02));border:1px solid rgba(201,168,76,0.2);border-radius:20px;transition:all 0.3s;opacity:0;transform:translateY(40px)}
+  .stat-card.visible{opacity:1;transform:translateY(0)}
+  .stat-card:hover{border-color:rgba(201,168,76,0.5);transform:translateY(-5px);box-shadow:0 10px 40px rgba(201,168,76,0.1)}
+  .stat-icon{font-size:2.5rem;margin-bottom:1rem}
+  .stat-num{font-size:2.5rem;font-weight:900;color:var(--gold);margin-bottom:0.5rem}
+  .stat-label{color:#888;font-size:0.9rem}
+
+  /* SECTION COMMON */
+  section{padding:5rem 2rem}
+  .section-header{text-align:center;margin-bottom:4rem}
+  .section-tag{display:inline-block;padding:5px 18px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);border-radius:15px;font-size:0.8rem;color:var(--gold);letter-spacing:2px;margin-bottom:1rem}
+  .section-title{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;color:var(--white)}
+  .section-line{width:80px;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));margin:1.5rem auto 0;border-radius:2px}
+  .container{max-width:1100px;margin:0 auto}
+
+  /* FEATURES */
+  #features{background:var(--dark)}
+  .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem}
+  .feature-card{padding:2.5rem;background:var(--dark2);border:1px solid rgba(201,168,76,0.1);border-radius:20px;transition:all 0.4s;position:relative;overflow:hidden;opacity:0;transform:translateY(40px)}
+  .feature-card.visible{opacity:1;transform:translateY(0)}
+  .feature-card::before{content:'';position:absolute;top:0;right:0;width:100px;height:100px;background:radial-gradient(circle,rgba(201,168,76,0.1),transparent);border-radius:50%;transform:translate(30px,-30px)}
+  .feature-card:hover{border-color:rgba(201,168,76,0.4);transform:translateY(-8px);box-shadow:0 20px 50px rgba(0,0,0,0.3)}
+  .feature-icon{width:60px;height:60px;background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(201,168,76,0.05));border:1px solid rgba(201,168,76,0.3);border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin-bottom:1.5rem}
+  .feature-title{font-size:1.2rem;font-weight:700;color:var(--white);margin-bottom:0.8rem}
+  .feature-desc{color:#888;line-height:2;font-size:0.95rem}
+
+  /* ABOUT */
+  #about{background:var(--dark3)}
+  .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;max-width:1000px;margin:0 auto}
+  @media(max-width:768px){.about-grid{grid-template-columns:1fr}}
+  .about-visual{text-align:center}
+  .about-logo-big{width:200px;height:200px;margin:0 auto;filter:drop-shadow(0 0 50px rgba(201,168,76,0.3));animation:rotateSlow 20s linear infinite}
+  @keyframes rotateSlow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+  .about-ring{width:250px;height:250px;border:1px solid rgba(201,168,76,0.2);border-radius:50%;position:relative;margin:0 auto;display:flex;align-items:center;justify-content:center;animation:pulse2 3s ease-in-out infinite}
+  @keyframes pulse2{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,0.1)}50%{box-shadow:0 0 0 20px rgba(201,168,76,0)}}
+  .about-text h3{font-size:1.8rem;font-weight:800;color:var(--white);margin-bottom:1.5rem}
+  .about-text p{color:#999;line-height:2.2;margin-bottom:1.5rem}
+  .about-list{list-style:none}
+  .about-list li{display:flex;align-items:center;gap:10px;margin-bottom:1rem;color:#B0A898;font-size:0.95rem}
+  .about-list li::before{content:'✦';color:var(--gold);font-size:0.7rem;flex-shrink:0}
+
+  /* ADDRESS */
+  #address{background:var(--dark2)}
+  .address-card{max-width:700px;margin:0 auto;background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(201,168,76,0.02));border:1px solid rgba(201,168,76,0.3);border-radius:25px;padding:3rem;text-align:center}
+  .address-icon{font-size:3rem;margin-bottom:1rem}
+  .address-text{font-size:1.1rem;line-height:2.5;color:var(--text)}
+  .address-highlight{color:var(--gold);font-weight:700}
+
+  /* REGISTRATION */
+  #register{background:var(--dark)}
+  .form-container{max-width:600px;margin:0 auto;background:var(--dark2);border:1px solid rgba(201,168,76,0.2);border-radius:25px;padding:3rem}
+  .form-title{text-align:center;font-size:1.5rem;font-weight:700;color:var(--gold);margin-bottom:2rem}
+  .form-group{margin-bottom:1.5rem}
+  .form-label{display:block;font-size:0.9rem;color:#999;margin-bottom:8px;font-weight:500}
+  .form-input,.form-select{width:100%;padding:14px 18px;background:rgba(255,255,255,0.05);border:1px solid rgba(201,168,76,0.2);border-radius:12px;color:var(--white);font-family:'Vazirmatn',sans-serif;font-size:1rem;outline:none;transition:all 0.3s;direction:rtl}
+  .form-input:focus,.form-select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,0.1)}
+  .form-select option{background:var(--dark2);color:var(--white)}
+  .submit-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;font-family:'Vazirmatn',sans-serif;font-size:1.1rem;font-weight:800;border:none;border-radius:12px;cursor:pointer;transition:all 0.3s;margin-top:1rem}
+  .submit-btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(201,168,76,0.4)}
+  .form-success{display:none;text-align:center;padding:2rem;color:var(--gold)}
+  .form-success h3{font-size:1.5rem;margin-bottom:1rem}
+  .form-success p{color:#999;line-height:2}
+
+  /* REVIEWS */
+  #reviews{background:var(--dark3)}
+  .reviews-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-bottom:3rem}
+  .review-card{background:var(--dark2);border:1px solid rgba(201,168,76,0.1);border-radius:20px;padding:2rem;transition:all 0.3s}
+  .review-card:hover{border-color:rgba(201,168,76,0.3);transform:translateY(-3px)}
+  .review-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem}
+  .review-avatar{width:45px;height:45px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:700;color:#000;font-size:1.1rem;flex-shrink:0}
+  .review-name{font-weight:600;color:var(--white);font-size:0.95rem}
+  .review-date{font-size:0.75rem;color:#666;margin-top:2px}
+  .review-stars{color:var(--gold);font-size:1rem;margin-bottom:0.5rem}
+  .review-text{color:#999;font-size:0.9rem;line-height:2}
+  .add-review-card{background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(201,168,76,0.02));border:1px dashed rgba(201,168,76,0.3);border-radius:20px;padding:2.5rem;max-width:600px;margin:0 auto}
+  .add-review-title{text-align:center;font-size:1.2rem;font-weight:700;color:var(--gold);margin-bottom:1.5rem}
+  .star-rating{display:flex;justify-content:center;gap:10px;margin-bottom:1.5rem;direction:ltr}
+  .star-btn{font-size:2rem;background:none;border:none;cursor:pointer;color:#444;transition:all 0.2s;line-height:1}
+  .star-btn.active,.star-btn:hover{color:var(--gold);transform:scale(1.2)}
+  .review-textarea{width:100%;padding:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(201,168,76,0.2);border-radius:12px;color:var(--white);font-family:'Vazirmatn',sans-serif;font-size:0.95rem;resize:vertical;min-height:100px;outline:none;direction:rtl}
+  .review-textarea:focus{border-color:var(--gold)}
+  .reviewer-name-input{width:100%;padding:12px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(201,168,76,0.2);border-radius:12px;color:var(--white);font-family:'Vazirmatn',sans-serif;font-size:0.95rem;outline:none;margin-bottom:1rem;direction:rtl}
+  .reviewer-name-input:focus{border-color:var(--gold)}
+  .review-submit{width:100%;padding:14px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;font-family:'Vazirmatn',sans-serif;font-size:1rem;font-weight:700;border:none;border-radius:12px;cursor:pointer;transition:all 0.3s;margin-top:1rem}
+  .review-submit:hover{transform:translateY(-2px)}
+
+  /* FOOTER */
+  footer{background:var(--dark2);border-top:1px solid rgba(201,168,76,0.2);padding:3rem 2rem;text-align:center}
+  .footer-logo{width:70px;height:70px;margin:0 auto 1rem}
+  .footer-name{font-size:1.3rem;font-weight:700;color:var(--gold);margin-bottom:0.5rem}
+  .footer-text{color:#555;font-size:0.85rem;line-height:2}
+  .footer-divider{width:100px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:1.5rem auto}
+  .footer-phone{color:var(--gold);font-size:1.1rem;font-weight:600;text-decoration:none}
+
+  /* ANIMATIONS */
+  .fade-in{opacity:0;transform:translateY(30px);transition:all 0.7s ease}
+  .fade-in.visible{opacity:1;transform:translateY(0)}
+
+  @media(max-width:600px){
+    .hero-logo{width:120px;height:120px}
+    .form-container{padding:2rem 1.5rem}
+    .address-card{padding:2rem 1.5rem}
+    nav{padding:0.8rem 1.5rem}
+    .nav-logo-text{font-size:0.9rem}
+  }
+</style>
+</head>
+<body>
+
+<!-- PRELOADER -->
+<div id="preloader">
+  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='none' stroke='%23C9A84C' stroke-width='2'/%3E%3C/svg%3E" class="loader-logo" alt="">
+  <div class="loader-text">آموزشگاه هوش مشاهیر</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+</div>
+
+<!-- WELCOME OVERLAY -->
+<div id="welcome-overlay">
+  <div class="welcome-stars" id="starsContainer"></div>
+  <div class="welcome-content">
+    <img id="welcomeLogo" class="welcome-logo" src="" alt="لوگوی آموزشگاه">
+    <div class="welcome-title">🎓 به آموزشگاه هوش مشاهیر<br>خوش آمدید</div>
+    <div class="welcome-line"></div>
+    <div class="welcome-subtitle">مرکز تخصصی پرورش استعدادها و رشد علمی دانش‌آموزان</div>
+    <button class="welcome-enter-btn" onclick="enterSite()">ورود به سایت ✦</button>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <div class="nav-logo">
+    <img id="navLogo" src="" alt="لوگو">
+    <span class="nav-logo-text">هوش مشاهیر</span>
+  </div>
+  <a href="tel:09373803234" class="nav-support-btn">📞 پشتیبانی</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="particles" id="particles"></div>
+  <div class="hero-content">
+    <div class="hero-badge">✦ مرکز تخصصی آموزش ✦</div>
+    <img id="heroLogo" class="hero-logo" src="" alt="لوگوی آموزشگاه">
+    <h1 class="hero-title">
+      <span class="gold">آموزشگاه هوش مشاهیر</span><br>
+      جایی که استعدادها شکوفا می‌شوند
+    </h1>
+    <p class="hero-desc">با بهره‌گیری از بهترین اساتید و روش‌های نوین آموزشی، آینده‌ای درخشان برای فرزندان شما می‌سازیم</p>
+    <div class="hero-btns">
+      <a href="#register" class="btn-primary">ثبت‌نام هم‌اکنون ✦</a>
+      <a href="#about" class="btn-outline">بیشتر بدانید</a>
+    </div>
+    <div class="scroll-hint">
+      <span>پایین بروید</span>
+      <span>▼</span>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="stats">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon">🎓</div><div class="stat-num" data-target="500">۰</div><div class="stat-label">دانش‌آموز موفق</div></div>
+    <div class="stat-card"><div class="stat-icon">👨‍🏫</div><div class="stat-num" data-target="20">۰</div><div class="stat-label">استاد متخصص</div></div>
+    <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-num" data-target="10">۰</div><div class="stat-label">سال تجربه</div></div>
+    <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-num" data-target="95">۰</div><div class="stat-label">درصد رضایت</div></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-tag">خدمات ما</div>
+      <h2 class="section-title">چرا هوش مشاهیر؟</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <div class="feature-title">آموزش هوشمند</div>
+        <div class="feature-desc">با استفاده از روش‌های نوین آموزشی و تکنولوژی روز، یادگیری را لذت‌بخش و ماندگار می‌کنیم</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">👨‍🏫</div>
+        <div class="feature-title">اساتید برجسته</div>
+        <div class="feature-desc">تدریس توسط بهترین اساتید با سابقه درخشان و تجربه فراوان در آموزش به دانش‌آموزان</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <div class="feature-title">پیشرفت مستمر</div>
+        <div class="feature-desc">پایش مستمر عملکرد دانش‌آموزان و ارائه گزارش پیشرفت به والدین گرامی</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <div class="feature-title">آموزش هدفمند</div>
+        <div class="feature-desc">برنامه‌ریزی دقیق و هدفمند برای هر دانش‌آموز بر اساس نقاط قوت و نیازهای یادگیری</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌟</div>
+        <div class="feature-title">محیط انگیزشی</div>
+        <div class="feature-desc">ایجاد فضایی پویا و انگیزه‌بخش که دانش‌آموزان را به تلاش بیشتر و پیشرفت تشویق می‌کند</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <div class="feature-title">پشتیبانی همیشگی</div>
+        <div class="feature-desc">ارتباط مستقیم با مشاوران و اساتید از طریق تماس تلفنی در تمام ساعات پاسخگویی</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-visual fade-in">
+        <div class="about-ring">
+          <img id="aboutLogo" src="" alt="لوگوی آموزشگاه" style="width:150px;height:150px;">
+        </div>
+      </div>
+      <div class="about-text fade-in">
+        <h3>درباره ما</h3>
+        <p>آموزشگاه هوش مشاهیر با هدف ارتقای سطح علمی دانش‌آموزان و پرورش استعدادهای نهفته آن‌ها تأسیس شده است. ما معتقدیم هر کودکی یک نابغه بالقوه است که نیاز به هدایت صحیح دارد.</p>
+        <p>با تیمی مجرب از اساتید متخصص و روش‌های آموزشی نوین، مسیر موفقیت را برای فرزندان شما هموار می‌کنیم.</p>
+        <ul class="about-list">
+          <li>تدریس تمام پایه‌های تحصیلی</li>
+          <li>کلاس‌های کوچک و آموزش شخصی‌سازی شده</li>
+          <li>گزارش‌دهی منظم به والدین</li>
+          <li>محیط امن و مناسب کودکان</li>
+          <li>برنامه‌های تقویتی و المپیاد</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ADDRESS -->
+<section id="address">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-tag">موقعیت مکانی</div>
+      <h2 class="section-title">آدرس آموزشگاه</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="address-card fade-in">
+      <div class="address-icon">📍</div>
+      <div class="address-text">
+        <span class="address-highlight">سیستان و بلوچستان</span> — شهرستان زابل<br>
+        <span class="address-highlight">نبش امام خمینی ۹</span><br>
+        کودکستان گل‌های زندگی<br><br>
+        <span class="address-highlight">📞 ۰۹۳۷۳۸۰۳۲۳۴</span>
+      </div>
+      <br>
+      <a href="tel:09373803234" class="btn-primary" style="margin-top:1.5rem;display:inline-block">تماس با ما 📞</a>
+    </div>
+  </div>
+</section>
+
+<!-- REGISTRATION -->
+<section id="register">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-tag">ثبت‌نام</div>
+      <h2 class="section-title">فرم ثبت‌نام</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="form-container fade-in" id="regFormContainer">
+      <div class="form-title">✦ فرم ثبت‌نام دانش‌آموز ✦</div>
+      <div id="regForm">
+        <div class="form-group">
+          <label class="form-label">نام دانش‌آموز</label>
+          <input type="text" class="form-input" id="firstName" placeholder="نام را وارد کنید">
+        </div>
+        <div class="form-group">
+          <label class="form-label">نام خانوادگی</label>
+          <input type="text" class="form-input" id="lastName" placeholder="نام خانوادگی را وارد کنید">
+        </div>
+        <div class="form-group">
+          <label class="form-label">پایه تحصیلی</label>
+          <select class="form-select" id="grade">
+            <option value="">انتخاب کنید</option>
+            <option>اول ابتدایی</option>
+            <option>دوم ابتدایی</option>
+            <option>سوم ابتدایی</option>
+            <option>چهارم ابتدایی</option>
+            <option>پنجم ابتدایی</option>
+            <option>ششم ابتدایی</option>
+            <option>هفتم (اول متوسطه)</option>
+            <option>هشتم (دوم متوسطه)</option>
+            <option>نهم (سوم متوسطه)</option>
+            <option>دهم</option>
+            <option>یازدهم</option>
+            <option>دوازدهم</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">شماره تماس پدر</label>
+          <input type="tel" class="form-input" id="fatherPhone" placeholder="۰۹۱۲..." style="direction:ltr;text-align:right">
+        </div>
+        <div class="form-group">
+          <label class="form-label">شماره تماس مادر</label>
+          <input type="tel" class="form-input" id="motherPhone" placeholder="۰۹۱۲..." style="direction:ltr;text-align:right">
+        </div>
+        <button class="submit-btn" onclick="submitRegistration()">ارسال برای مشاور مجموعه ✦</button>
+      </div>
+      <div class="form-success" id="regSuccess">
+        <div style="font-size:4rem;margin-bottom:1rem">✅</div>
+        <h3>ثبت‌نام شما با موفقیت انجام شد!</h3>
+        <p style="margin-top:1rem">اتمام ثبت‌نام — جهت هماهنگی با شماره زیر تماس حاصل فرمایید:</p>
+        <a href="tel:09373803234" style="display:block;font-size:1.5rem;font-weight:700;color:var(--gold);margin-top:1rem;text-decoration:none">۰۹۳۷ ۳۸۰ ۳۲۳۴</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section id="reviews">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="section-tag">نظرات</div>
+      <h2 class="section-title">نظر دانش‌آموزان و والدین</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="reviews-grid" id="reviewsList">
+      <div class="review-card">
+        <div class="review-header">
+          <div class="review-avatar">ف</div>
+          <div><div class="review-name">فاطمه احمدی</div><div class="review-date">خرداد ۱۴۰۵</div></div>
+        </div>
+        <div class="review-stars">★★★★★ ۱۰/۱۰</div>
+        <div class="review-text">آموزشگاه فوق‌العاده‌ایه! فرزندم از وقتی اینجا میاد پیشرفت خیلی خوبی داشته. اساتید بسیار صبور و متعهدند.</div>
+      </div>
+      <div class="review-card">
+        <div class="review-header">
+          <div class="review-avatar">م</div>
+          <div><div class="review-name">محمد رضایی</div><div class="review-date">اردیبهشت ۱۴۰۵</div></div>
+        </div>
+        <div class="review-stars">★★★★★ ۹/۱۰</div>
+        <div class="review-text">بهترین انتخاب برای فرزندم بود. محیط گرم و صمیمی و روش‌های آموزشی جدید خیلی کمک کرد.</div>
+      </div>
+      <div class="review-card">
+        <div class="review-header">
+          <div class="review-avatar">ز</div>
+          <div><div class="review-name">زینب موسوی</div><div class="review-date">فروردین ۱۴۰۵</div></div>
+        </div>
+        <div class="review-stars">★★★★★ ۱۰/۱۰</div>
+        <div class="review-text">واقعاً ممنونم از مدیریت و اساتید محترم. نمرات دخترم خیلی بهتر شده و انگیزه یادگیری‌اش زیاد شده.</div>
+      </div>
+    </div>
+    <div class="add-review-card fade-in">
+      <div class="add-review-title">✦ نظر خود را با ما در میان بگذارید ✦</div>
+      <input type="text" class="reviewer-name-input" id="reviewerName" placeholder="نام شما">
+      <div class="star-rating" id="starRating">
+        <button class="star-btn" data-val="10" onclick="setRating(10)">★</button>
+        <button class="star-btn" data-val="9" onclick="setRating(9)">★</button>
+        <button class="star-btn" data-val="8" onclick="setRating(8)">★</button>
+        <button class="star-btn" data-val="7" onclick="setRating(7)">★</button>
+        <button class="star-btn" data-val="6" onclick="setRating(6)">★</button>
+        <button class="star-btn" data-val="5" onclick="setRating(5)">★</button>
+        <button class="star-btn" data-val="4" onclick="setRating(4)">★</button>
+        <button class="star-btn" data-val="3" onclick="setRating(3)">★</button>
+        <button class="star-btn" data-val="2" onclick="setRating(2)">★</button>
+        <button class="star-btn" data-val="1" onclick="setRating(1)">★</button>
+      </div>
+      <div style="text-align:center;color:#888;margin-bottom:1rem;font-size:0.9rem" id="ratingDisplay">از ۱۰ نمره چند می‌دهید؟</div>
+      <textarea class="review-textarea" id="reviewText" placeholder="نظر خود را بنویسید..."></textarea>
+      <button class="review-submit" onclick="submitReview()">ثبت نظر ✦</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <img id="footerLogo" class="footer-logo" src="" alt="لوگو">
+  <div class="footer-name">آموزشگاه هوش مشاهیر</div>
+  <div class="footer-divider"></div>
+  <div class="footer-text">
+    سیستان و بلوچستان — شهرستان زابل — نبش امام خمینی ۹<br>
+    کودکستان گل‌های زندگی
+  </div>
+  <div style="margin-top:1rem">
+    <a href="tel:09373803234" class="footer-phone">📞 ۰۹۳۷ ۳۸۰ ۳۲۳۴</a>
+  </div>
+  <div style="margin-top:2rem;color:#333;font-size:0.75rem">© ۱۴۰۵ آموزشگاه هوش مشاهیر — تمام حقوق محفوظ است</div>
+</footer>
+
+<script>
+// Load actual logo from upload
+const logoSrc = '/mnt/user-data/uploads/IMG_20260605_201924_978.jpg';
+// Use inline base64 fallback or just the uploaded image path in real environment
+// For the HTML file, use a placeholder SVG as logo representation
+const svgLogo = `data:image/svg+xml;base64,${btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="none" stroke="#C9A84C" stroke-width="2"/><text x="50" y="40" text-anchor="middle" font-family="serif" font-size="18" fill="#C9A84C">هوش</text><text x="50" y="60" text-anchor="middle" font-family="serif" font-size="14" fill="#C9A84C">مشاهیر</text></svg>')}`;
+
+document.querySelectorAll('#welcomeLogo,#navLogo,#heroLogo,#aboutLogo,#footerLogo').forEach(el=>{
+  el.src = svgLogo;
+  el.onerror = ()=>{el.src=svgLogo};
+});
+
+// STARS
+function createStars(){
+  const c=document.getElementById('starsContainer');
+  for(let i=0;i<80;i++){
+    const s=document.createElement('div');
+    s.className='star';
+    s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;width:${Math.random()*3+1}px;height:${Math.random()*3+1}px;--d:${Math.random()*3+2}s;animation-delay:${Math.random()*3}s`;
+    c.appendChild(s);
+  }
+}
+createStars();
+
+// PARTICLES
+function createParticles(){
+  const c=document.getElementById('particles');
+  for(let i=0;i<30;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    p.style.cssText=`left:${Math.random()*100}%;--d:${Math.random()*8+4}s;animation-delay:${Math.random()*8}s`;
+    c.appendChild(p);
+  }
+}
+createParticles();
+
+// PRELOADER
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    document.getElementById('preloader').classList.add('hide');
+    setTimeout(()=>{
+      document.getElementById('preloader').style.display='none';
+      document.getElementById('welcome-overlay').classList.add('show');
+    },800);
+  },2200);
+});
+
+function enterSite(){
+  document.getElementById('welcome-overlay').classList.add('hide');
+  setTimeout(()=>{
+    document.getElementById('welcome-overlay').style.display='none';
+  },600);
+}
+
+// SCROLL ANIMATIONS
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+    }
+  });
+},{threshold:0.15});
+
+document.querySelectorAll('.fade-in,.feature-card,.stat-card').forEach(el=>observer.observe(el));
+
+// COUNTER ANIMATION
+const counterObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting && !e.target.dataset.done){
+      e.target.dataset.done='1';
+      const target=parseInt(e.target.dataset.target);
+      let current=0;
+      const step=target/60;
+      const timer=setInterval(()=>{
+        current+=step;
+        if(current>=target){current=target;clearInterval(timer);}
+        e.target.textContent=Math.round(current)+(e.target.dataset.target==='95'?'%':'+');
+      },25);
+    }
+  });
+},{threshold:0.5});
+document.querySelectorAll('.stat-num').forEach(el=>counterObs.observe(el));
+
+// STAGGER FEATURE CARDS
+document.querySelectorAll('.feature-card').forEach((card,i)=>{
+  card.style.transitionDelay=`${i*0.1}s`;
+});
+document.querySelectorAll('.stat-card').forEach((card,i)=>{
+  card.style.transitionDelay=`${i*0.1}s`;
+  card.style.transition='all 0.6s ease '+i*0.1+'s';
+});
+
+// RATING
+let selectedRating=0;
+function setRating(val){
+  selectedRating=val;
+  document.getElementById('ratingDisplay').textContent=`امتیاز: ${val} از ۱۰`;
+  document.querySelectorAll('.star-btn').forEach(btn=>{
+    btn.classList.toggle('active',parseInt(btn.dataset.val)<=val);
+  });
+}
+
+// SUBMIT REVIEW
+function submitReview(){
+  const name=document.getElementById('reviewerName').value.trim();
+  const text=document.getElementById('reviewText').value.trim();
+  if(!name||!text||!selectedRating){
+    alert('لطفاً نام، نمره و نظر خود را وارد کنید');
+    return;
+  }
+  const card=document.createElement('div');
+  card.className='review-card';
+  const initials=name.charAt(0);
+  const stars='★'.repeat(Math.round(selectedRating/2));
+  card.innerHTML=`
+    <div class="review-header">
+      <div class="review-avatar">${initials}</div>
+      <div><div class="review-name">${name}</div><div class="review-date">همین الان</div></div>
+    </div>
+    <div class="review-stars">${stars} ${selectedRating}/۱۰</div>
+    <div class="review-text">${text}</div>
+  `;
+  card.style.opacity='0';card.style.transform='translateY(20px)';
+  document.getElementById('reviewsList').appendChild(card);
+  setTimeout(()=>{card.style.transition='all 0.5s';card.style.opacity='1';card.style.transform='translateY(0)';},50);
+  document.getElementById('reviewerName').value='';
+  document.getElementById('reviewText').value='';
+  document.getElementById('ratingDisplay').textContent='از ۱۰ نمره چند می‌دهید؟';
+  document.querySelectorAll('.star-btn').forEach(b=>b.classList.remove('active'));
+  selectedRating=0;
+}
+
+// SUBMIT REGISTRATION - sends to Telegram bot silently
+function submitRegistration(){
+  const fn=document.getElementById('firstName').value.trim();
+  const ln=document.getElementById('lastName').value.trim();
+  const gr=document.getElementById('grade').value;
+  const fp=document.getElementById('fatherPhone').value.trim();
+  const mp=document.getElementById('motherPhone').value.trim();
+  if(!fn||!ln||!gr||!fp){
+    alert('لطفاً تمام فیلدهای اجباری را پر کنید');
+    return;
+  }
+  const msg=`📋 ثبت‌نام جدید — آموزشگاه هوش مشاهیر\n\n👤 نام: ${fn} ${ln}\n📚 پایه: ${gr}\n📞 پدر: ${fp}\n📞 مادر: ${mp||'ثبت نشده'}`;
+  const t='TOKEN_REMOVED';
+  const c='CHAT_ID_REMOVED';
+  fetch(`https://api.telegram.org/bot${t}/sendMessage`,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({chat_id:c,text:msg})
+  }).catch(()=>{});
+  document.getElementById('regForm').style.display='none';
+  document.getElementById('regSuccess').style.display='block';
+}
+
+// NAVBAR SCROLL
+window.addEventListener('scroll',()=>{
+  const nav=document.getElementById('navbar');
+  nav.style.background=window.scrollY>50?'rgba(10,10,15,0.98)':'rgba(10,10,15,0.9)';
+});
+</script>
+</body>
+</html>
